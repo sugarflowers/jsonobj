@@ -6,11 +6,18 @@ pub struct Json {
 }
 
 impl Json {
+    pub fn new(jsondata: &str) -> Self {
+        Self {
+            data: serde_json::from_str(jsondata).unwrap(),
+        }
+    }
+    /*
     pub fn new() -> Self {
         Self {
             data: serde_json::from_str("{}").unwrap(),
         }
     }
+    */
     pub fn open(path: &str) -> Self {
         let file = fs::File::open(path).unwrap();
         Self {
@@ -71,7 +78,15 @@ fn main() {
     jso.disp();
 
     */
-    let mut jso = Json::new();
+
+    let jsondata = r#"
+    {
+        "text": "Hello, world!"
+    }
+    "#;
+
+
+    let mut jso = Json::new(jsondata);
 
 
     jso.set("name", "taro".to_string());
