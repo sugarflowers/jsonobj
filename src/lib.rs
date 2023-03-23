@@ -39,7 +39,7 @@ impl Json {
 
 
 pub trait Set<T> {
-    pub fn set(&mut self, key: &str, value: T);
+    fn set(&mut self, key: &str, value: T);
 }
 
 impl Set<i32> for Json {
