@@ -43,19 +43,19 @@ pub trait Set<T> {
 }
 
 impl Set<i32> for Json {
-    pub fn set (&mut self, key: &str, value: i32) {
+    fn set (&mut self, key: &str, value: i32) {
         self.set_value(key, Value::Number(serde_json::Number::from(value)));
     }
 }
 
 impl Set<String> for Json {
-    pub fn set (&mut self, key: &str, value: String) {
+    fn set (&mut self, key: &str, value: String) {
         self.set_value(key, Value::String(value));
     }
 }
 
 impl Set<Json> for Json {
-    pub fn set (&mut self, key: &str, value: Json) {
+    fn set (&mut self, key: &str, value: Json) {
         self.set_value(key, value.data);
     }
 }
