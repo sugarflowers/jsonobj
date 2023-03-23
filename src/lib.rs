@@ -31,11 +31,12 @@ impl Json {
         println!("{:?}", self.data);
     }
     
-    fn set_value(&mut self, key: &str, value: Value) {
+    pub fn set_value(&mut self, key: &str, value: Value) {
         let obj = self.data.as_object_mut().unwrap();
         obj.insert(key.to_string(), value);
     }
 }
+
 
 
 pub trait Set<T> {
