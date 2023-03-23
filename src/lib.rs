@@ -1,106 +1,83 @@
-use std::fs;
-use serde_json::{Value, from_reader};
+/*
+ * This file is part of PROJECT.
+ *
+ * PROJECT is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * PROJECT is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with PROJECT.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
+use std::path::PathBuf;
+use std::env;
 
-pub struct Json {
-    pub data: Value,
+pub struct PathObj {
+    pub path: PathBuf,
 }
 
-
-impl Json {
-
-    pub fn new(jsondata: &str) -> Self {
+impl PathObj {
+    pub fn new() -> Self {
         Self {
-            data: serde_json::from_str(jsondata).unwrap(),
+            path: PathBuf::new(),
         }
     }
 
-    pub fn open(path: &str) -> Self {
-        let file = fs::File::open(path).unwrap();
-        Self {
-            data: from_reader(file).unwrap(),
+    pub fn push(&mut self, value: &str){
+        self.path.push(value);
+    }
+
+    pub fn join(&mut self, values: Vec<&str>) {
+        for value in values {
+            self.path.push(value);
         }
     }
 
-    pub fn save(&self, path: &str) {
-        let file = fs::File::create(path).unwrap();
-        serde_json::to_writer_pretty(file, &self.data).unwrap();
+    pub fn pop(&mut self) {
+        self.path.pop();
     }
 
-    pub fn disp(&self) {
-        println!("{:?}", self.data);
+    pub fn parent(&mut self) -> String {
+        let path = self.path.parent().unwrap();
+        format!("{}", path.display()) 
+    }
+
+    pub fn file_name(&mut self) -> String {
+        let path = self.path.file_name().unwrap();
+        format!("{}", path.to_string_lossy())
+    }
+
+    pub fn extension(&mut self) -> String {
+        let path = self.path.extension().unwrap();
+        format!("{}", path.to_string_lossy())
     }
     
-    pub fn set_value(&mut self, key: &str, value: Value) {
-        let obj = self.data.as_object_mut().unwrap();
-        obj.insert(key.to_string(), value);
+    pub fn getcwd() -> String {
+        let current = env::current_dir().unwrap();
+        format!("{}", current.display()) 
     }
+    
 }
-
-
-
-pub trait Set<T> {
-    fn set(&mut self, key: &str, value: T);
-}
-
-impl Set<i32> for Json {
-    fn set (&mut self, key: &str, value: i32) {
-        self.set_value(key, Value::Number(serde_json::Number::from(value)));
-    }
-}
-
-impl Set<String> for Json {
-    fn set (&mut self, key: &str, value: String) {
-        self.set_value(key, Value::String(value));
-    }
-}
-
-impl Set<Json> for Json {
-    fn set (&mut self, key: &str, value: Json) {
-        self.set_value(key, value.data);
-    }
-}
-
-
-pub fn to_string(val: Value) -> String {
-    val.as_str().unwrap_or("").to_string()
-}
-
-pub fn to_i32(val: Value) -> i32 {
-    val.as_i64().unwrap_or(0) as i32
-}
-
 
 /*
-fn main() {
-    let mut jso = Json::open("test.json");
 
-    jso.set("country", "USA".to_string());
-    jso.set("members", 102);
-    jso.disp();
+use pathobj::PathObject;
 
+let mut path = PathObject::new();
+path.push(&t);
+path.push("aaa");
 
-    let jsondata = r#"
-    {
-        "text": "Hello, world!"
-    }
-    "#;
+path.join(vec!["abc", "def", "ghi.png"]);
 
+println!("{}", path.parent());
+println!("{}", path.file_name());
+println!("{}", path.extension());
+println!("{}", PathObject::getcwd());
 
-    let mut jso = Json::new(jsondata);
-
-
-    jso.set("name", "taro".to_string());
-    jso.set("age", 16);
-    jso.disp();
-
-    jso.save("save.json");
-
-    let name = jso.get::<String>("name");
-    println!("{}", name);
-    println!("{}", to_i32(jso.data["array"][2].clone()));
-    let buf = to_string(jso.data["name"].clone());
-    println!("{}", buf);
-
-}
-*/
+ */
