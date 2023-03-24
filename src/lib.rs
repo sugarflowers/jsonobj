@@ -1,6 +1,5 @@
 use std::fs;
 use serde_json::{Value, from_reader};
-use Set;
 
 pub struct Json {
     pub data: Value,
