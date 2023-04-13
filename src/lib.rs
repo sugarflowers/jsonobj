@@ -1,6 +1,7 @@
 use std::fs;
 use serde_json::{Value, from_reader};
 
+
 pub struct Json {
     pub data: Value,
 }
@@ -33,6 +34,16 @@ impl Json {
     pub fn set_value(&mut self, key: &str, value: Value) {
         let obj = self.data.as_object_mut().unwrap();
         obj.insert(key.to_string(), value);
+    }
+
+    pub fn keys(&self) -> Vec<String> {
+        let mut keys = Vec::new();
+        if let Some(obj) = self.data.as_object() {
+            for key in obj.keys() {
+                keys.push(key.to_string());
+            }
+        }
+        keys
     }
 }
 
@@ -70,36 +81,32 @@ pub fn to_i32(val: Value) -> i32 {
 }
 
 
-/*
-fn main() {
+#[test]
+fn test_json() {
     let mut jso = Json::open("test.json");
 
-    jso.set("country", "USA".to_string());
-    jso.set("members", 102);
-    jso.disp();
+    let name = to_string(jso.data["name"].clone());
+    let age = to_i32(jso.data["age"].clone());
 
+    println!("{} ({})", name, age);
 
-    let jsondata = r#"
-    {
-        "text": "Hello, world!"
-    }
-    "#;
-
-
-    let mut jso = Json::new(jsondata);
-
-
-    jso.set("name", "taro".to_string());
-    jso.set("age", 16);
-    jso.disp();
-
-    jso.save("save.json");
-
-    let name = jso.get::<String>("name");
-    println!("{}", name);
-    println!("{}", to_i32(jso.data["array"][2].clone()));
-    let buf = to_string(jso.data["name"].clone());
-    println!("{}", buf);
-
+    jso.set("age", 25);
+    let age = to_i32(jso.data["age"].clone());
+    println!("{} ({})", name, age);
 }
-*/
+
+#[test]
+fn new_json() {
+    let mut jso = Json::new("{}");
+    jso.set("name", "hanako".to_string());
+    let name = to_string(jso.data["name"].clone());
+    println!("{}", name);
+    jso.save("test2.json");
+}
+
+#[test]
+fn keys_test() {
+    let mut jso = Json::open("test.json");
+    println!("{:?}", jso.keys());
+}
+
