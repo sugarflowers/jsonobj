@@ -1,6 +1,6 @@
 use std::fs;
-use serde_json::{Value, from_reader};
-use Set;
+use serde_json::Value;
+use sjis::{is_sjis, decode};
 
 pub struct Json {
     pub data: Value,
@@ -16,9 +16,15 @@ impl Json {
     }
 
     pub fn open(path: &str) -> Self {
-        let file = fs::File::open(path).unwrap();
+        let br = binaryfile::BinaryReader::open(path).unwrap().read().unwrap();
+        let json_data: String; 
+        if is_sjis(&br) {
+            json_data = decode(br);
+        } else {
+            json_data = String::from_utf8(br).unwrap();
+        }
         Self {
-            data: from_reader(file).unwrap(),
+            data: serde_json::from_str(&json_data).unwrap(),
         }
     }
 
@@ -34,6 +40,16 @@ impl Json {
     pub fn set_value(&mut self, key: &str, value: Value) {
         let obj = self.data.as_object_mut().unwrap();
         obj.insert(key.to_string(), value);
+    }
+
+    pub fn keys(&self) -> Vec<String> {
+        let mut keys = Vec::new();
+        if let Some(obj) = self.data.as_object() {
+            for key in obj.keys() {
+                keys.push(key.to_string());
+            }
+        }
+        keys
     }
 }
 
@@ -70,37 +86,32 @@ pub fn to_i32(val: Value) -> i32 {
     val.as_i64().unwrap_or(0) as i32
 }
 
+#[test]
+fn test_json() {
+    let mut jso = Json::open("test_sjis.json");
 
-/*
-fn main() {
-    let mut jso = Json::open("test.json");
+    let name = to_string(jso.data["name"].clone());
+    let age = to_i32(jso.data["age"].clone());
 
-    jso.set("country", "USA".to_string());
-    jso.set("members", 102);
-    jso.disp();
+    println!("{} ({})", name, age);
 
-
-    let jsondata = r#"
-    {
-        "text": "Hello, world!"
-    }
-    "#;
-
-
-    let mut jso = Json::new(jsondata);
-
-
-    jso.set("name", "taro".to_string());
-    jso.set("age", 16);
-    jso.disp();
-
-    jso.save("save.json");
-
-    let name = jso.get::<String>("name");
-    println!("{}", name);
-    println!("{}", to_i32(jso.data["array"][2].clone()));
-    let buf = to_string(jso.data["name"].clone());
-    println!("{}", buf);
-
+    jso.set("age", 25);
+    let age = to_i32(jso.data["age"].clone());
+    println!("{} ({})", name, age);
 }
-*/
+
+#[test]
+fn new_json() {
+    let mut jso = Json::new("{}");
+    jso.set("name", "hanako".to_string());
+    let name = to_string(jso.data["name"].clone());
+    println!("{}", name);
+    jso.save("test2.json");
+}
+
+#[test]
+fn keys_test() {
+    let jso = Json::open("test.json");
+    println!("{:?}", jso.keys());
+}
+
