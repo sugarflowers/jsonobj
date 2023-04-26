@@ -32,9 +32,8 @@ checksum = "453ad9f582a441959e5f0d088b02ce04cfe8d51a8eaf077f12ac6d3e94164ca6"
 name = "jsonobj"
 version = "0.2.0"
 dependencies = [
- "binaryfile",
  "serde_json",
- "sjis",
+ "textreader",
 ]
 
 [[package]]
@@ -63,7 +62,16 @@ dependencies = [
 [[package]]
 name = "sjis"
 version = "0.1.0"
-source = "git+https://github.com/sugarflowers/sjis.git#22d091c1efa8faac901f1d4861e5680b9bc43c1a"
+source = "git+https://github.com/sugarflowers/sjis.git#81aab6ca3b4316de3abaef9e8d68c2a1ff213444"
 dependencies = [
  "encoding_rs",
+]
+
+[[package]]
+name = "textreader"
+version = "0.1.0"
+source = "git+https://github.com/sugarflowers/textreader.git#41d7716a193fa794c4d55168008a3941b7a1a704"
+dependencies = [
+ "binaryfile",
+ "sjis",
 ]

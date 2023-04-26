@@ -1,6 +1,6 @@
 use std::fs;
 use serde_json::Value;
-use sjis::{is_sjis, decode};
+use textreader::TextReader;
 
 pub struct Json {
     pub data: Value,
@@ -16,13 +16,7 @@ impl Json {
     }
 
     pub fn open(path: &str) -> Self {
-        let br = binaryfile::BinaryReader::open(path).unwrap().read().unwrap();
-        let json_data: String; 
-        if is_sjis(&br) {
-            json_data = decode(br);
-        } else {
-            json_data = String::from_utf8(br).unwrap();
-        }
+        let json_data = TextReader::open(path).unwrap().read();
         Self {
             data: serde_json::from_str(&json_data).unwrap(),
         }

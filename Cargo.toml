@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 serde_json = "1.0.94"
-binaryfile = { git = "https://github.com/sugarflowers/binaryfile.git" }
-sjis = { git = "https://github.com/sugarflowers/sjis.git" }
+#binaryfile = { git = "https://github.com/sugarflowers/binaryfile.git" }
+#sjis = { git = "https://github.com/sugarflowers/sjis.git" }
+textreader = { git = "https://github.com/sugarflowers/textreader.git" }
