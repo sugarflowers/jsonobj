@@ -1,111 +1,110 @@
+use std::path::PathBuf;
+//use std::env;
 use std::fs;
-use serde_json::Value;
-use textreader::TextReader;
 
-pub struct Json {
-    pub data: Value,
+pub struct PathObj {
+    pub path: PathBuf,
 }
 
-
-impl Json {
-
-    pub fn new(jsondata: &str) -> Self {
+impl PathObj {
+    pub fn new() -> Self {
         Self {
-            data: serde_json::from_str(jsondata).unwrap(),
+            path: PathBuf::new(),
         }
     }
 
-    pub fn open(path: &str) -> Self {
-        let json_data = TextReader::open(path).unwrap().read();
-        Self {
-            data: serde_json::from_str(&json_data).unwrap(),
+    pub fn push(&mut self, value: &str){
+        self.path.push(value);
+    }
+
+    pub fn join(&mut self, values: Vec<&str>) {
+        for value in values {
+            self.path.push(value);
         }
     }
 
-    pub fn save(&self, path: &str) {
-        let file = fs::File::create(path).unwrap();
-        serde_json::to_writer_pretty(file, &self.data).unwrap();
+    pub fn from_str(&mut self, val: &str) {
+        let sval: Vec<&str> = val.split(std::path::MAIN_SEPARATOR).collect();
+        self.join(sval);
     }
 
-    pub fn disp(&self) {
-        println!("{:?}", self.data);
+    pub fn pop(&mut self) {
+        self.path.pop();
+    }
+
+    pub fn parent(&mut self) -> String {
+        let path = self.path.parent().unwrap();
+        format!("{}", path.display()) 
+    }
+
+    pub fn file_name(&mut self) -> String {
+        let path = self.path.file_name().unwrap();
+        format!("{}", path.to_string_lossy())
+    }
+
+    pub fn extension(&mut self) -> String {
+        let path = self.path.extension().unwrap();
+        format!("{}", path.to_string_lossy())
     }
     
-    pub fn set_value(&mut self, key: &str, value: Value) {
-        let obj = self.data.as_object_mut().unwrap();
-        obj.insert(key.to_string(), value);
+    
+    pub fn get(&self) -> String {
+        self.path.to_string_lossy().to_string()
     }
 
-    pub fn keys(&self) -> Vec<String> {
-        let mut keys = Vec::new();
-        if let Some(obj) = self.data.as_object() {
-            for key in obj.keys() {
-                keys.push(key.to_string());
-            }
+    pub fn set(&mut self, path: &str) {
+        self.path = PathBuf::from(path);
+    }
+
+    pub fn is_dir(&self) -> bool {
+        self.path.is_dir()
+    }
+
+    pub fn is_file(&self) -> bool {
+        self.path.is_file()
+    }
+
+    pub fn getcwd(&mut self) {
+        let current = std::env::current_dir().unwrap();
+        self.path = current;
+    }
+
+    pub fn get_home(&mut self) {
+        let home = env::get_env("USERPROFILE");
+        self.set(&home);
+    }
+
+    pub fn get_temp(&mut self) {
+        let temp = env::get_env("TEMP");
+        self.set(&temp);
+    }
+
+    pub fn is_exists(&self) -> bool {
+        if let Ok(_m) = fs::metadata(&self.path) {
+            true
+        } else {
+            false
         }
-        keys
     }
 }
 
-
-
-pub trait Set<T> {
-    fn set(&mut self, key: &str, value: T);
-}
-
-impl Set<i32> for Json {
-    fn set (&mut self, key: &str, value: i32) {
-        self.set_value(key, Value::Number(serde_json::Number::from(value)));
-    }
-}
-
-impl Set<String> for Json {
-    fn set (&mut self, key: &str, value: String) {
-        self.set_value(key, Value::String(value));
-    }
-}
-
-impl Set<Json> for Json {
-    fn set (&mut self, key: &str, value: Json) {
-        self.set_value(key, value.data);
-    }
-}
-
-
-pub fn to_string(val: Value) -> String {
-    val.as_str().unwrap_or("").to_string()
-}
-
-pub fn to_i32(val: Value) -> i32 {
-    val.as_i64().unwrap_or(0) as i32
-}
 
 #[test]
-fn test_json() {
-    let mut jso = Json::open("test_sjis.json");
-
-    let name = to_string(jso.data["name"].clone());
-    let age = to_i32(jso.data["age"].clone());
-
-    println!("{} ({})", name, age);
-
-    jso.set("age", 25);
-    let age = to_i32(jso.data["age"].clone());
-    println!("{} ({})", name, age);
+fn new_function_test() {
+    let mut p = PathObj::new();
+    p.getcwd();
+    println!("{:?}", p.is_exists());
 }
-
 #[test]
-fn new_json() {
-    let mut jso = Json::new("{}");
-    jso.set("name", "hanako".to_string());
-    let name = to_string(jso.data["name"].clone());
-    println!("{}", name);
-    jso.save("test2.json");
+fn str_path() {
+    let mut p = PathObj::new();
+    p.from_str("a\\b\\c");
+    println!("{:?}", p.parent());
 }
-
 #[test]
-fn keys_test() {
-    let jso = Json::open("test.json");
-    println!("{:?}", jso.keys());
+fn home_dir() {
+    let mut p = PathObj::new();
+    p.get_home();
+    println!("{:?}", p.get());
+    println!("{:?}", p.parent());
 }
-
