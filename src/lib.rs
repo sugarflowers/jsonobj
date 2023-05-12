@@ -65,11 +65,13 @@ impl Set<String> for Json {
     }
 }
 
+/*
 impl Set<Json> for Json {
     fn set (&mut self, key: &str, value: Json) {
         self.set_value(key, value.data);
     }
 }
+*/
 
 
 pub fn to_string(val: Value) -> String {
@@ -79,6 +81,7 @@ pub fn to_string(val: Value) -> String {
 pub fn to_i32(val: Value) -> i32 {
     val.as_i64().unwrap_or(0) as i32
 }
+
 
 #[test]
 fn test_json() {
