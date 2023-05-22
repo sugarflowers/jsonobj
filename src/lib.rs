@@ -1,9 +1,7 @@
 use std::fs;
 use serde_json::Value;
 use textreader::TextReader;
-
-//use anyhow::{anyhow, Result};
-
+use std::error::Error;
 
 pub struct Json {
     pub data: Value,
@@ -12,19 +10,16 @@ pub struct Json {
 
 impl Json {
 
-    pub fn new(jsondata: &str) -> Self {
-        Self {
-            data: serde_json::from_str(jsondata).unwrap(),
-        }
+    pub fn new(jsondata: &str) -> result<Self, Box<dyn Error> {
+        let d = serde_json::from_str(jsondata)?;
+        Ok(Self { data: d } )
     }
 
-    pub fn open(path: &str) -> Self {
-        let json_data = TextReader::open(path).unwrap().read().unwrap();
-        Self {
-            data: serde_json::from_str(&json_data).unwrap(),
-        }
+    pub fn open(path: &str) -> Result<Self, Box<dyn Error>> {
+        let json_data = TextReader::open(path)?.read()?;
+        let d = serde_json::from_str(&json_data)?;
+        Ok(Self { data: d } )
     }
-
 
     pub fn save(&self, path: &str) {
         let file = fs::File::create(path).unwrap();
@@ -89,7 +84,7 @@ pub fn to_i32(val: Value) -> i32 {
 
 #[test]
 fn test_json() {
-    let mut jso = Json::open("test_sjis.json");
+    let mut jso = Json::open("test_sjis.json").unwrap();
 
     let name = to_string(jso.data["name"].clone());
     let age = to_i32(jso.data["age"].clone());
@@ -103,7 +98,7 @@ fn test_json() {
 
 #[test]
 fn new_json() {
-    let mut jso = Json::new("{}");
+    let mut jso = Json::new("{}").unwrap();
     jso.set("name", "hanako".to_string());
     let name = to_string(jso.data["name"].clone());
     println!("{}", name);
@@ -112,7 +107,7 @@ fn new_json() {
 
 #[test]
 fn keys_test() {
-    let jso = Json::open("test.json");
+    let jso = Json::open("test.json").unwrap();
     println!("{:?}", jso.keys());
 }
 
