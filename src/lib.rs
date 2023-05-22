@@ -10,7 +10,7 @@ pub struct Json {
 
 impl Json {
 
-    pub fn new(jsondata: &str) -> result<Self, Box<dyn Error> {
+    pub fn new(jsondata: &str) -> Result<Self, Box<dyn Error>> {
         let d = serde_json::from_str(jsondata)?;
         Ok(Self { data: d } )
     }
