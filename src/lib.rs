@@ -2,6 +2,9 @@ use std::fs;
 use serde_json::Value;
 use textreader::TextReader;
 
+//use anyhow::{anyhow, Result};
+
+
 pub struct Json {
     pub data: Value,
 }
@@ -16,11 +19,12 @@ impl Json {
     }
 
     pub fn open(path: &str) -> Self {
-        let json_data = TextReader::open(path).unwrap().read();
+        let json_data = TextReader::open(path).unwrap().read().unwrap();
         Self {
             data: serde_json::from_str(&json_data).unwrap(),
         }
     }
+
 
     pub fn save(&self, path: &str) {
         let file = fs::File::create(path).unwrap();
