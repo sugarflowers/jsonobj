@@ -21,11 +21,13 @@ impl Json {
         Ok(Self { data: d } )
     }
 
-    pub fn save(&self, path: &str) {
-        let file = fs::File::create(path).unwrap();
-        serde_json::to_writer_pretty(file, &self.data).unwrap();
+    pub fn save(&self, path: &str) -> Result<(), Box<dyn Error>> {
+        let file = fs::File::create(path)?;
+        serde_json::to_writer_pretty(file, &self.data)?;
+        Ok(())
     }
 
+    
     pub fn disp(&self) {
         println!("{:?}", self.data);
     }
@@ -34,6 +36,7 @@ impl Json {
         let obj = self.data.as_object_mut().unwrap();
         obj.insert(key.to_string(), value);
     }
+    
 
     pub fn keys(&self) -> Vec<String> {
         let mut keys = Vec::new();
@@ -64,15 +67,6 @@ impl Set<String> for Json {
     }
 }
 
-/*
-impl Set<Json> for Json {
-    fn set (&mut self, key: &str, value: Json) {
-        self.set_value(key, value.data);
-    }
-}
-*/
-
-
 pub fn to_string(val: Value) -> String {
     val.as_str().unwrap_or("").to_string()
 }
@@ -102,7 +96,7 @@ fn new_json() {
     jso.set("name", "hanako".to_string());
     let name = to_string(jso.data["name"].clone());
     println!("{}", name);
-    jso.save("test2.json");
+    jso.save("test2.json").unwrap();
 }
 
 #[test]
